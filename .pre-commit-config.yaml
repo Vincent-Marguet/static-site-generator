@@ -22,6 +22,6 @@ repos:
         entry: python -m unittest discover
         language: python
         types: [python]
-        stages: [commit]
+        stages: [pre-commit]
         args: ["src"]
         pass_filenames: false
