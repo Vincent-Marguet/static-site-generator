@@ -42,6 +42,62 @@ class TestParentNode(unittest.TestCase):
         with self.assertRaises(ValueError):
             node.to_html()
 
+    def test_complex_nested_structure(self):
+        # This represents a typical article structure with header, content sections and footer
+        node = ParentNode(
+            "article",
+            [
+                ParentNode(
+                    "header",
+                    [
+                        ParentNode("h1", [LeafNode(None, "Welcome to my Blog")]),
+                        ParentNode(
+                            "nav",
+                            [
+                                LeafNode("a", "Home", {"href": "/"}),
+                                LeafNode(None, " | "),
+                                LeafNode("a", "About", {"href": "/about"}),
+                            ],
+                        ),
+                    ],
+                ),
+                ParentNode(
+                    "section",
+                    [
+                        ParentNode("h2", [LeafNode(None, "Recent Posts")]),
+                        ParentNode(
+                            "p",
+                            [
+                                LeafNode("b", "First Post:"),
+                                LeafNode(None, " Some interesting content here with "),
+                                LeafNode("i", "italic"),
+                                LeafNode(None, " and "),
+                                LeafNode("b", "bold"),
+                                LeafNode(None, " text."),
+                            ],
+                        ),
+                    ],
+                ),
+                ParentNode(
+                    "footer",
+                    [
+                        LeafNode(None, "Copyright "),
+                        LeafNode("span", "2024", {"class": "year"}),
+                    ],
+                ),
+            ],
+        )
+
+        expected = (
+            "<article><header><h1>Welcome to my Blog</h1><nav>"
+            '<a href="/">Home</a> | <a href="/about">About</a></nav></header>'
+            "<section><h2>Recent Posts</h2><p><b>First Post:</b> Some interesting "
+            "content here with <i>italic</i> and <b>bold</b> text.</p></section>"
+            '<footer>Copyright <span class="year">2024</span></footer></article>'
+        )
+
+        self.assertEqual(node.to_html(), expected)
+
 
 if __name__ == "__main__":
     unittest.main()
