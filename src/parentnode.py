@@ -6,6 +6,10 @@ from htmlnode import HTMLNode
 
 
 class ParentNode(HTMLNode):
+    """
+    ParentNode class is a child from HTMLNode class
+    """
+
     def __init__(self, tag, children, props=None) -> None:
         super().__init__(tag, None, children, props)
 
