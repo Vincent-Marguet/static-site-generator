@@ -1,3 +1,7 @@
+"""
+This module implement LeafNode child class from HTMLNode parent class
+"""
+
 from htmlnode import HTMLNode
 
 
