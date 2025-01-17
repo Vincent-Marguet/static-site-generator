@@ -27,6 +27,9 @@ class TestLeafNode(unittest.TestCase):
         self.assertEqual(node3.to_html(), "Just text")
 
     def test_leaf_node_nested_props(self):
+        """
+        Test a nested leaf node
+        """
         # Create a div with some nested style properties
         style_props = {"style": {"color": "blue", "font-size": "12px"}}
         node = LeafNode("div", "Styled text", style_props)
