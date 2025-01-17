@@ -39,8 +39,10 @@ class TestTextNode(unittest.TestCase):
         Test the repr method
         """
         node = TextNode("This is a test text node", TextType.ITALIC)
-        node2 = TextNode("I LOVE testing", TextType.BOLD, "https://www.babouya.net")
-        self.assertEqual(repr(node), "TextNode(This is a test text node, italic, None)")
+        node2 = TextNode("I LOVE testing", TextType.BOLD,
+                         "https://www.babouya.net")
+        self.assertEqual(
+            repr(node), "TextNode(This is a test text node, italic, None)")
         self.assertEqual(
             repr(node2),
             "TextNode(I LOVE testing, bold, https://www.babouya.net)",
@@ -51,7 +53,8 @@ class TestTextNode(unittest.TestCase):
         Test if not equal if text is the same but TextType is different
         """
         node1 = TextNode("This is a test text node", TextType.ITALIC)
-        node2 = TextNode("I LOVE testing", TextType.BOLD, "https://www.babouya.net")
+        node2 = TextNode("I LOVE testing", TextType.BOLD,
+                         "https://www.babouya.net")
         node3 = TextNode("This is a text node", TextType.NORMAL)
         node4 = TextNode("This is a text node", TextType.BOLD)
         node5 = TextNode("This is a text node", TextType.NORMAL)

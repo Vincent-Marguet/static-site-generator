@@ -27,6 +27,9 @@ class HTMLNode:
 
     @property
     def tag(self):
+        """
+        Getter for tag member
+        """
         return self._tag
 
     @tag.setter
@@ -35,6 +38,9 @@ class HTMLNode:
 
     @property
     def value(self):
+        """
+        Getter for value member
+        """
         return self._value
 
     @value.setter
@@ -43,6 +49,9 @@ class HTMLNode:
 
     @property
     def children(self):
+        """
+        Getter for children member
+        """
         return self._children
 
     @children.setter
@@ -55,6 +64,9 @@ class HTMLNode:
 
     @property
     def props(self):
+        """
+        Getter for props member
+        """
         return self._props
 
     @props.setter
@@ -71,7 +83,8 @@ class HTMLNode:
 
     def props_to_html(self):
         """
-        Returns a string that represents the HTML attributes of the node (handles nested dictionaries).
+        Returns a string that represents the HTML attributes
+        of the node (handles nested dictionaries).
         """
 
         def process_dict(d):
@@ -83,7 +96,8 @@ class HTMLNode:
                 if isinstance(value, dict):  # Handle nested dictionaries
                     if key == "style":
                         # Flatten style dict properly
-                        style_string = "; ".join([f"{k}:{v}" for k, v in value.items()])
+                        style_string = "; ".join(
+                            [f"{k}:{v}" for k, v in value.items()])
                         attributes.append(f'{key}="{style_string}"')
                     else:
                         nested = process_dict(
@@ -91,7 +105,8 @@ class HTMLNode:
                         ).strip()  # No leading/trailing space in nested
                         attributes.append(f'{key}="{nested}"')
                 else:
-                    attributes.append(f'{key}="{value}"')  # Standard key-value pair
+                    # Standard key-value pair
+                    attributes.append(f'{key}="{value}"')
             return " ".join(attributes)  # Join attributes with a single space
 
         # Call the recursive helper with self.props

@@ -18,4 +18,8 @@ class ParentNode(HTMLNode):
             raise ValueError("ParentNode must have a tag")
         if self.children is None:
             raise ValueError("ParentNode must have at least one child")
-        return f"<{self.tag}{self.props_to_html()}>{''.join(map(lambda child: child.to_html(), self.children))}</{self.tag}>"
+        return (
+            f"<{self.tag}{self.props_to_html()}>"
+            f"{''.join(map(lambda x: x.to_html(), self.children))
+               }</{self.tag}>"
+        )

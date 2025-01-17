@@ -1,5 +1,5 @@
 """
-TextNode class has two methods : 
+TextNode class has two methods :
 --eq-- : compare two TextNode object
 --repr-- : represent the TextNode object's member as a string
 """
@@ -32,6 +32,9 @@ class TextNode:
 
     @property
     def text(self):
+        """
+        Getter for text member
+        """
         return self._text
 
     @text.setter
@@ -40,6 +43,9 @@ class TextNode:
 
     @property
     def text_type(self):
+        """
+        Getter for text_type member
+        """
         return self._text_type
 
     @text_type.setter
@@ -48,6 +54,9 @@ class TextNode:
 
     @property
     def url(self):
+        """
+        Getter for url member
+        """
         return self._url
 
     @url.setter

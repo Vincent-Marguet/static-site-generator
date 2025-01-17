@@ -1,3 +1,7 @@
+"""
+Test class for ParentNode class
+"""
+
 import unittest
 
 from leafnode import LeafNode
@@ -5,11 +9,21 @@ from parentnode import ParentNode
 
 
 class TestParentNode(unittest.TestCase):
+    """
+    Test class
+    """
+
     def test_basic_parent_with_single_child(self):
+        """
+        Test a basic parent with one child
+        """
         node = ParentNode("div", [LeafNode("span", "hello")])
         self.assertEqual(node.to_html(), "<div><span>hello</span></div>")
 
     def test_parent_with_multiple_children(self):
+        """
+        Test a parent with multiple children
+        """
         node = ParentNode(
             "p",
             [
@@ -23,26 +37,44 @@ class TestParentNode(unittest.TestCase):
         )
 
     def test_nested_parent_nodes(self):
-        node = ParentNode("div", [ParentNode("p", [LeafNode("span", "nested")])])
-        self.assertEqual(node.to_html(), "<div><p><span>nested</span></p></div>")
+        """
+        Test a nested parent
+        """
+        node = ParentNode(
+            "div", [ParentNode("p", [LeafNode("span", "nested")])])
+        self.assertEqual(
+            node.to_html(), "<div><p><span>nested</span></p></div>")
 
     def test_parent_with_props(self):
-        node = ParentNode("div", [LeafNode("span", "hello")], {"class": "greeting"})
+        """
+        Test a parent with props
+        """
+        node = ParentNode("div", [LeafNode("span", "hello")], {
+                          "class": "greeting"})
         self.assertEqual(
             node.to_html(), '<div class="greeting"><span>hello</span></div>'
         )
 
     def test_no_tag_raises_error(self):
+        """
+        Test that no tag raise Error
+        """
         node = ParentNode(None, [LeafNode("span", "hello")])
         with self.assertRaises(ValueError):
             node.to_html()
 
     def test_no_children_raises_error(self):
+        """
+        Test that no children for ParentNode raise Error
+        """
         node = ParentNode("div", None)
         with self.assertRaises(ValueError):
             node.to_html()
 
     def test_complex_nested_structure(self):
+        """
+        Test a more complex nested structure
+        """
         # This represents a typical article structure with header, content sections and footer
         node = ParentNode(
             "article",
@@ -50,7 +82,8 @@ class TestParentNode(unittest.TestCase):
                 ParentNode(
                     "header",
                     [
-                        ParentNode("h1", [LeafNode(None, "Welcome to my Blog")]),
+                        ParentNode(
+                            "h1", [LeafNode(None, "Welcome to my Blog")]),
                         ParentNode(
                             "nav",
                             [
@@ -69,7 +102,8 @@ class TestParentNode(unittest.TestCase):
                             "p",
                             [
                                 LeafNode("b", "First Post:"),
-                                LeafNode(None, " Some interesting content here with "),
+                                LeafNode(
+                                    None, " Some interesting content here with "),
                                 LeafNode("i", "italic"),
                                 LeafNode(None, " and "),
                                 LeafNode("b", "bold"),

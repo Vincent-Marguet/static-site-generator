@@ -6,6 +6,11 @@ from htmlnode import HTMLNode
 
 
 class LeafNode(HTMLNode):
+    """
+    LeafNode class can have no children member
+    and must have tag and value. props is optional
+    """
+
     def __init__(self, tag, value, props=None) -> None:
         super().__init__(tag, value, None, props)
 
