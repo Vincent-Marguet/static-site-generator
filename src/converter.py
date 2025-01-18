@@ -1,6 +1,10 @@
 """
 This module hold converting between format functions
+Regexes in place are documented with # in their respective
+implementation
 """
+
+import re
 
 from leafnode import LeafNode
 from textnode import TextNode, TextType
@@ -78,3 +82,35 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             result_nodes.extend(split_text(node.text))
 
     return result_nodes
+
+
+def extract_markdown_images(text):
+    """
+    Use a regex ro return a list of tuple ("alt_text", "url")
+    """
+    #    IMAGE_PATTERN = r"""
+    #    !                   # literal exclamation mark
+    #    \[                  # literal opening bracket
+    #    ([^\[\]]*)         # first capture group (alt text)
+    #    \]                  # literal closing bracket
+    #    \(                  # literal opening paren
+    #    ([^\(\)]*)         # second capture group (url)
+    #    \)                  # literal closing paren
+    #    """
+    return re.findall(r"!\[([^\[\]]*)\]\(([^\(\)]*)\)", text)
+
+
+def extract_markdown_links(text):
+    """
+    Use a regex to return a list of tuple ("anchor_text", "url")
+    """
+    #    LINK_PATTERN = r"""
+    #    (?<!!)             # negative lookbehind for ! to ensure not an image
+    #    \[                  # literal opening bracket
+    #    ([^\[\]]*)         # first capture group (link text)
+    #    \]                  # literal closing bracket
+    #    \(                  # literal opening paren
+    #    ([^\(\)]*)         # second capture group (url)
+    #    \)                  # literal closing paren
+    #    """
+    return re.findall(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", text)

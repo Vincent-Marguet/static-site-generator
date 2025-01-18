@@ -4,7 +4,12 @@ Test class for converter.py functions
 
 import unittest
 
-from converter import split_nodes_delimiter, text_node_to_html
+from converter import (
+    extract_markdown_images,
+    extract_markdown_links,
+    split_nodes_delimiter,
+    text_node_to_html,
+)
 from leafnode import LeafNode
 from textnode import TextNode, TextType
 
@@ -198,6 +203,127 @@ class TestSplitNodesDelimiter(unittest.TestCase):
 
         result = split_nodes_delimiter(nodes, "`", TextType.CODE)
         self.assertEqual(result, expected)
+
+
+class TestExtractMarkdownImages(unittest.TestCase):
+    """
+    Test class for extract_markdown_images function
+    """
+
+    def test_single_basic_image(self):
+        """
+        Check against a single image
+        """
+        self.assertEqual(
+            extract_markdown_images("![cat](https://cats.com/cat.jpg)"),
+            [("cat", "https://cats.com/cat.jpg")],
+        )
+
+    def test_multiple_images(self):
+        """
+        Check against multiple images
+        """
+        self.assertEqual(
+            extract_markdown_images(
+                "![dog](dog.jpg) some text ![cat](cat.jpg)"),
+            [("dog", "dog.jpg"), ("cat", "cat.jpg")],
+        )
+
+    def test_empty_string(self):
+        """
+        Check against empty strings for image
+        """
+        self.assertEqual(extract_markdown_images(""), [])
+
+    def test_image_with_spaces_in_alt_text(self):
+        """
+        Check against space in alt_text
+        """
+        self.assertEqual(
+            extract_markdown_images(
+                "![cute fluffy cat](https://cats.com/fluffy.jpg)"),
+            [("cute fluffy cat", "https://cats.com/fluffy.jpg")],
+        )
+
+    def test_complex_url_with_special_characters(self):
+        """
+        Check against a complex url and special characters
+        """
+        self.assertEqual(
+            extract_markdown_images(
+                "![test](https://example.com/path?id=123&type=.jpg)"
+            ),
+            [("test", "https://example.com/path?id=123&type=.jpg")],
+        )
+
+
+class TestExtractMarkdownLinks(unittest.TestCase):
+    """
+    Test class for extract_markdown_link function
+    """
+
+    def test_single_basic_link(self):
+        """
+        Check against a simple link
+        """
+        self.assertEqual(
+            extract_markdown_links("[Boot.dev](https://boot.dev)"),
+            [("Boot.dev", "https://boot.dev")],
+        )
+
+    def test_multiple_links(self):
+        """
+        Check against multiple links
+        """
+        self.assertEqual(
+            extract_markdown_links(
+                "Check out [Python](https://python.org) and [Go](https://go.dev)"
+            ),
+            [("Python", "https://python.org"), ("Go", "https://go.dev")],
+        )
+
+    def test_link_with_image_nearby(self):
+        """
+        Check against image link combination
+        """
+        self.assertEqual(
+            extract_markdown_links("![img](img.jpg) [link](url.com)"),
+            [("link", "url.com")],
+        )
+
+    def test_link_with_special_characters(self):
+        """
+        Check against link including special characters
+        """
+        self.assertEqual(
+            extract_markdown_links(
+                "[query](https://api.com/data?id=123&type=json)"),
+            [("query", "https://api.com/data?id=123&type=json")],
+        )
+
+    def test_empty_string(self):
+        """
+        Check against empty string
+        """
+        self.assertEqual(extract_markdown_links(""), [])
+
+    def test_complex_mix_links_images(self):
+        """
+        Check against a complex mix of links and images
+        """
+        string = (
+            r"[first](https://first.com) ![img](image.jpg)"
+            r"[second](https://second.com) ![another](pic.png)"
+            r"[third](https://third.com)"
+        )
+        self.assertEqual(
+            extract_markdown_links(string),
+            [
+                ("first", "https://first.com"),
+                ("second", "https://second.com"),
+                ("third", "https://third.com"),
+            ],
+        )
 
 
 if __name__ == "__main__":
