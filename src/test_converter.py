@@ -136,7 +136,7 @@ class TestMarkdownToBlocks(unittest.TestCase):
 
     def test_complex_markdown(self):
         """
-        Check against a complex markdown blocks structure. Trailing whitespaces are preserved
+        Check against a complex markdown blocks structure.
         """
         complex_markdown = """
            \n\n# Heading 1
@@ -161,6 +161,15 @@ class TestMarkdownToBlocks(unittest.TestCase):
             "Another paragraph with *italic text*.",
         ]
         self.assertEqual(markdown_to_blocks(complex_markdown), expected_output)
+
+    def test_trailing_whitespace(self):
+        """
+        Check against leading and trailing whitespaces
+        """
+        markdown = "      Header\n\n     Next     \n\n"
+        expected = ["Header", "Next"]
+
+        self.assertEqual((markdown_to_blocks(markdown)), expected)
 
 
 class TestSplitNodesDelimiter(unittest.TestCase):

@@ -40,7 +40,7 @@ def text_node_to_html(text_node: TextNode):
 
 def markdown_to_blocks(markdown_text):
     """
-    Create MarkDown blocks from a MarkDown text
+    Create MarkDown blocks from a MarkDown text, return a list of blocks
     """
     # Base case
     if not markdown_text:
