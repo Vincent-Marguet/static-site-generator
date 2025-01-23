@@ -9,6 +9,7 @@ from converter import (
     extract_markdown_links,
     find_delimiters_first_position,
     find_matching_delimiter,
+    markdown_to_blocks,
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
@@ -84,6 +85,82 @@ class TestTextNodeToHTML(unittest.TestCase):
         node = TextNode("alt text", {TextType.IMAGE})
         expected = LeafNode("img", "", {"src": None, "alt": "alt text"})
         self.assertEqual(text_node_to_html(node), expected)
+
+
+class TestMarkdownToBlocks(unittest.TestCase):
+    """
+    Test class for markdown_to_blocks function
+    """
+
+    def test_normal_blocks(self):
+        """
+        Check against a simple case
+        """
+        markdown = "# Heading\n\nThis is a paragraph.\n\n* Item 1\n* Item 2\n"
+        expected = ["# Heading", "This is a paragraph.", "* Item 1\n* Item 2"]
+        self.assertEqual(markdown_to_blocks(markdown), expected)
+
+    def test_excessive_blank_lines(self):
+        """
+        Check against excessive blank lines
+        """
+        markdown = (
+            "\n\n# Heading\n\n\nThis is a paragraph.\n\n\n\n* Item 1\n* Item 2\n\n"
+        )
+        expected = ["# Heading", "This is a paragraph.", "* Item 1\n* Item 2"]
+        self.assertEqual(markdown_to_blocks(markdown), expected)
+
+    def test_whitespace_only_blocks(self):
+        """
+        Check against whitespace only blocks
+        """
+        markdown = "   \n\n# Title\n\n   \n\nContent\n\n   "
+        expected = ["# Title", "Content"]
+        self.assertEqual(markdown_to_blocks(markdown), expected)
+
+    def test_single_block(self):
+        """
+        Check against a single block
+        """
+        markdown = "# Only Heading"
+        expected = ["# Only Heading"]
+        self.assertEqual(markdown_to_blocks(markdown), expected)
+
+    def test_empty_input(self):
+        """
+        Check against empty input
+        """
+        markdown = ""
+        expected = []
+        self.assertEqual(markdown_to_blocks(markdown), expected)
+
+    def test_complex_markdown(self):
+        """
+        Check against a complex markdown blocks structure. Trailing whitespaces are preserved
+        """
+        complex_markdown = """
+           \n\n# Heading 1
+
+        This is a paragraph with **bold text**.
+        It spans multiple lines.
+
+           * Item 1
+           * Item 2
+
+        # Heading 2
+
+           Another paragraph with *italic text*.
+
+        \n\n
+        """
+        expected_output = [
+            "# Heading 1",
+            "This is a paragraph with **bold text**.\n        It spans multiple lines.",
+            "* Item 1\n           * Item 2",
+            "# Heading 2",
+            "Another paragraph with *italic text*.",
+        ]
+        self.assertEqual(markdown_to_blocks(complex_markdown), expected_output)
 
 
 class TestSplitNodesDelimiter(unittest.TestCase):

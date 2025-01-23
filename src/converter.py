@@ -38,6 +38,26 @@ def text_node_to_html(text_node: TextNode):
             )
 
 
+def markdown_to_blocks(markdown_text):
+    """
+    Create MarkDown blocks from a MarkDown text
+    """
+    # Base case
+    if not markdown_text:
+        return []
+
+    split = markdown_text.split("\n\n")
+
+    # Filter out empty or whitespace-only blocks
+    split_filtered = list(filter(lambda x: x.strip(), split))
+
+    # After filtering, we use recursive call
+    ret = split_filtered[0].strip()
+    remaining = "\n\n".join(split_filtered[1:])
+
+    return [ret] + markdown_to_blocks(remaining)
+
+
 def text_to_textnodes(text):
     """
     Creates the TextNode objects list by calling each split function
@@ -278,8 +298,10 @@ def validate_textnodes(nodes):
         # Ensure 'type' matches a valid TextType
         for style in node.styles:
             if style not in TextType:
-                raise ValueError(f"TextNode type {
-                                 node.styles} is not a valid TextType")
+                raise ValueError(
+                    f"TextNode type {
+                        node.styles} is not a valid TextType"
+                )
 
         # If the node is of a type that requires a URL, check for its existence/validity
         if node.styles in [{TextType.IMAGE}, {TextType.LINK}]:
