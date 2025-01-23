@@ -4,8 +4,14 @@ Test module for converter.py functions
 
 import unittest
 
-from converter import block_to_block_type, markdown_to_blocks, text_node_to_html
+from converter import (
+    block_to_block_type,
+    markdown_to_blocks,
+    markdown_to_html_node,
+    text_node_to_html,
+)
 from leafnode import LeafNode
+from parentnode import ParentNode
 from textnode import TextNode, TextType
 
 
@@ -264,6 +270,114 @@ class TestBlockToBlockType(unittest.TestCase):
             block_to_block_type(
                 "1. not a list because no second item"), "paragraph"
         )
+
+
+class TestMarkdownToHTML(unittest.TestCase):
+    """
+    Test class for markdown_to_html_node function
+    """
+
+    def test_paragraphs_and_headings(self):
+        """
+        Check against paragraphs and headings
+        """
+        markdown = "# Main Header\n\nThis is a paragraph.\n\n## Subheader"
+        node = markdown_to_html_node(markdown)
+        self.assertEqual(node.tag, "div")
+        self.assertEqual(len(node.children), 3)
+        self.assertEqual(node.children[0].tag, "h1")
+        self.assertEqual(node.children[1].tag, "p")
+        self.assertEqual(node.children[2].tag, "h2")
+
+    def test_unordered_list(self):
+        """
+        Check against unordered_list
+        """
+        markdown = "* Item 1\n* Item 2\n* Item 3"
+        node = markdown_to_html_node(markdown)
+        self.assertEqual(len(node.children), 1)
+        self.assertEqual(node.children[0].tag, "ul")
+        self.assertEqual(len(node.children[0].children), 3)
+        self.assertEqual(node.children[0].children[0].tag, "li")
+        self.assertEqual(
+            node.children[0].children[0].children[0].value, "Item 1")
+
+    def test_code_block(self):
+        """
+        Check against code block
+        """
+        markdown = "```\ndef hello():\n    print('Hello')\n```"
+        node = markdown_to_html_node(markdown)
+        self.assertEqual(len(node.children), 1)
+        self.assertEqual(node.children[0].tag, "pre")
+        self.assertEqual(node.children[0].children[0].tag, "code")
+
+    def test_complex_nested_structure(self):
+        """
+        Check against a complex nested structure with multiple children and props
+        """
+        # Create some leaf nodes
+        child1 = LeafNode("span", "Hello")
+        child2 = LeafNode("em", "World")
+
+        # Create a nested parent with style props
+        nested_parent = ParentNode(
+            "div", [child1, child2], {
+                "style": {"color": "blue", "margin": "10px"}}
+        )
+
+        # Create the root parent with multiple children including the nested one
+        root = ParentNode(
+            "section",
+            [LeafNode("h1", "Title"), nested_parent, LeafNode("p", "Footer")],
+            {"class": "main-section"},
+        )
+
+        expected_html = (
+            '<section class="main-section">'
+            "<h1>Title</h1>"
+            '<div style="color:blue; margin:10px">'
+            "<span>Hello</span>"
+            "<em>World</em>"
+            "</div>"
+            "<p>Footer</p>"
+            "</section>"
+        )
+
+        self.assertEqual(root.to_html(), expected_html)
+
+    def test_markdown_to_html_node(self):
+        """
+        Check against pipeline markdown_to_html(text) to_html
+        """
+        markdown = (
+            "# Title\n"
+            "\n"
+            "> Blockquote\n"
+            "\n"
+            "- Item one\n"
+            "- Item two\n"
+            "\n"
+            "Paragraph body with **bold** text."
+        )
+
+        expected_html = (
+            "<div>"
+            "<h1>Title</h1>"
+            "<blockquote>Blockquote</blockquote>"
+            "<ul>"
+            "<li>Item one</li>"
+            "<li>Item two</li>"
+            "</ul>"
+            "<p>Paragraph body with <b>bold</b> text.</p>"
+            "</div>"
+        )
+
+        # Make the call
+        result_html = markdown_to_html_node(markdown).to_html()
+
+        # Assert equality
+        self.assertEqual(result_html, expected_html)
 
 
 if __name__ == "__main__":

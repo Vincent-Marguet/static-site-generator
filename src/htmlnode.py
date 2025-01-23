@@ -22,8 +22,9 @@ class HTMLNode:
     def __init__(self, tag=None, value=None, children=None, props=None) -> None:
         self._tag = tag
         self._value = value
-        self._children = children
+        self._children = []
         self._props = props
+        self.children = children
 
     @property
     def tag(self):
@@ -60,7 +61,7 @@ class HTMLNode:
             isinstance(child, HTMLNode) for child in children
         ):
             raise ValueError("All children must be instances of HTMLNode.")
-        self._children = children
+        self._children = children if children is not None else []
 
     @property
     def props(self):

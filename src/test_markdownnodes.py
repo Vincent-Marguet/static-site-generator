@@ -5,17 +5,7 @@ functions
 
 import unittest
 
-from split_nodes import (
-    extract_markdown_images,
-    extract_markdown_links,
-    find_delimiters_first_position,
-    find_matching_delimiter,
-    split_nodes_delimiter,
-    split_nodes_image,
-    split_nodes_link,
-    text_to_textnodes,
-    validate_textnodes,
-)
+from markdownnode import MarkdownNodes
 from textnode import TextNode, TextType
 
 
@@ -30,7 +20,8 @@ class TestTextToTextNodes(unittest.TestCase):
         """
         input_text = "This is plain text."
         expected_output = [TextNode("This is plain text.", {TextType.NORMAL})]
-        self.assertEqual(text_to_textnodes(input_text), expected_output)
+        self.assertEqual(MarkdownNodes.text_to_textnodes(
+            input_text), expected_output)
 
     def test_bold_text(self):
         """
@@ -42,7 +33,8 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode("bold", {TextType.BOLD}),
             TextNode(" text.", {TextType.NORMAL}),
         ]
-        self.assertEqual(text_to_textnodes(input_text), expected_output)
+        self.assertEqual(MarkdownNodes.text_to_textnodes(
+            input_text), expected_output)
 
     def test_italic_text(self):
         """
@@ -54,7 +46,8 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode("italic", {TextType.ITALIC}),
             TextNode(" style.", {TextType.NORMAL}),
         ]
-        self.assertEqual(text_to_textnodes(input_text), expected_output)
+        self.assertEqual(MarkdownNodes.text_to_textnodes(
+            input_text), expected_output)
 
     def test_combined_styles(self):
         """
@@ -68,7 +61,8 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode("italic", {TextType.ITALIC}),
             TextNode(" styles.", {TextType.NORMAL}),
         ]
-        self.assertEqual(text_to_textnodes(input_text), expected_output)
+        self.assertEqual(MarkdownNodes.text_to_textnodes(
+            input_text), expected_output)
 
     def test_multiple_inline_and_complex_markdown(self):
         """
@@ -89,7 +83,7 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode("an image", {TextType.IMAGE}, "https://image.com"),
             TextNode(".", {TextType.NORMAL}),
         ]
-        result = text_to_textnodes(input_text)
+        result = MarkdownNodes.text_to_textnodes(input_text)
         self.assertEqual(result, expected_output)
 
     def test_nested_formats(self):
@@ -97,7 +91,7 @@ class TestTextToTextNodes(unittest.TestCase):
         Check against text with both bold and italic
         """
         input_text = "This is ***both bold and italic*** text"
-        output = text_to_textnodes(input_text)
+        output = MarkdownNodes.text_to_textnodes(input_text)
         expected = [
             TextNode("This is ", {TextType.NORMAL}),
             TextNode("both bold and italic", {TextType.BOLD, TextType.ITALIC}),
@@ -120,7 +114,7 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode(" bold", {TextType.BOLD}),
             TextNode(" something", {TextType.NORMAL}),
         ]
-        output = text_to_textnodes(input_text)
+        output = MarkdownNodes.text_to_textnodes(input_text)
         self.assertEqual(output, expected)
 
     def test_nested_bold_in_italic(self):
@@ -135,7 +129,7 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode(" something ", {TextType.NORMAL}),
             TextNode("bold and italic", {TextType.BOLD, TextType.ITALIC}),
         ]
-        output = text_to_textnodes(input_text)
+        output = MarkdownNodes.text_to_textnodes(input_text)
         self.assertEqual(output, expected)
 
     def test_nested_italic_in_bold(self):
@@ -152,7 +146,7 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode(" something ", {TextType.NORMAL}),
             TextNode("bold and italic", {TextType.BOLD, TextType.ITALIC}),
         ]
-        output = text_to_textnodes(input_text)
+        output = MarkdownNodes.text_to_textnodes(input_text)
         self.assertEqual(output, expected)
 
     def test_simple_nest(self):
@@ -165,7 +159,7 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode("italic-bold", {TextType.BOLD, TextType.ITALIC}),
             TextNode(" bold", {TextType.BOLD}),
         ]
-        self.assertEqual(expected, text_to_textnodes(input_text))
+        self.assertEqual(expected, MarkdownNodes.text_to_textnodes(input_text))
 
     def test_intermediate_nest(self):
         """
@@ -179,7 +173,7 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode("bold-italic", {TextType.BOLD, TextType.ITALIC}),
             TextNode(" and italic", {TextType.ITALIC}),
         ]
-        self.assertEqual(expected, text_to_textnodes(input_text))
+        self.assertEqual(expected, MarkdownNodes.text_to_textnodes(input_text))
 
     def test_nested_in_code(self):
         """
@@ -192,7 +186,7 @@ class TestTextToTextNodes(unittest.TestCase):
                     TextType.CODE}
             ),
         ]
-        self.assertEqual(expected, text_to_textnodes(input_text))
+        self.assertEqual(expected, MarkdownNodes.text_to_textnodes(input_text))
 
     def test_complex(self):
         """
@@ -238,7 +232,7 @@ class TestTextToTextNodes(unittest.TestCase):
             TextNode(" ", {TextType.NORMAL}),
             TextNode("link", {TextType.LINK}, "https://example.com"),
         ]
-        self.assertEqual(expected, text_to_textnodes(input_text))
+        self.assertEqual(expected, MarkdownNodes.text_to_textnodes(input_text))
 
 
 class TestSplitNodesDelimiter(unittest.TestCase):
@@ -256,7 +250,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             TextNode("italic", TextType.ITALIC),
             TextNode(" world", {TextType.NORMAL}),
         ]
-        result = split_nodes_delimiter(node)
+        result = MarkdownNodes.split_nodes_delimiter(node)
         # Note: You'll need to implement __eq__ in TextNode for this to work
         self.assertEqual(result, expected)
 
@@ -272,7 +266,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             TextNode("bold", {TextType.BOLD}),
             TextNode(" text", {TextType.NORMAL}),
         ]
-        result = split_nodes_delimiter(node)
+        result = MarkdownNodes.split_nodes_delimiter(node)
         self.assertEqual(result, expected)
 
     def test_non_text_node_preserved(self):
@@ -290,7 +284,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             TextNode(" and ", {TextType.NORMAL}),
             TextNode("code", {TextType.CODE}),
         ]
-        result = split_nodes_delimiter(nodes)
+        result = MarkdownNodes.split_nodes_delimiter(nodes)
         self.assertEqual(result, expected)
 
     def test_missing_delimiter_raises_error(self):
@@ -300,7 +294,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
         # Method 1: Using context manager (recommended)
         node = [TextNode("text with unclosed *code", {TextType.NORMAL})]
         with self.assertRaises(ValueError):
-            split_nodes_delimiter(node)
+            MarkdownNodes.split_nodes_delimiter(node)
 
     def test_invalid_node_type_raises_error(self):
         """
@@ -311,7 +305,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             "not a text node",  # This should cause an error
         ]
         with self.assertRaises(TypeError):
-            split_nodes_delimiter(nodes)
+            MarkdownNodes.split_nodes_delimiter(nodes)
 
     def test_complex_mixed_nodes(self):
         """
@@ -349,7 +343,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             TextNode("!", {TextType.NORMAL}),
         ]
 
-        result = split_nodes_delimiter(nodes)
+        result = MarkdownNodes.split_nodes_delimiter(nodes)
         self.assertEqual(result, expected)
 
     def test_adjacent_and_mixed_formatting(self):
@@ -365,7 +359,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
             TextNode("italic", {TextType.ITALIC}),
             TextNode(".", {TextType.NORMAL}),
         ]
-        result = text_to_textnodes(input_text)
+        result = MarkdownNodes.text_to_textnodes(input_text)
         self.assertEqual(result, expected_output)
 
     def test_edge_markdown_without_plain_text(self):
@@ -376,7 +370,7 @@ class TestSplitNodesDelimiter(unittest.TestCase):
         expected_output = [
             TextNode("only bolded text", {TextType.BOLD}),
         ]
-        result = text_to_textnodes(input_text)
+        result = MarkdownNodes.text_to_textnodes(input_text)
         self.assertEqual(result, expected_output)
 
 
@@ -390,7 +384,8 @@ class TestExtractMarkdownImages(unittest.TestCase):
         Check against a single image
         """
         self.assertEqual(
-            extract_markdown_images("![cat](https://cats.com/cat.jpg)"),
+            MarkdownNodes.extract_markdown_images(
+                "![cat](https://cats.com/cat.jpg)"),
             [("cat", "https://cats.com/cat.jpg")],
         )
 
@@ -399,8 +394,9 @@ class TestExtractMarkdownImages(unittest.TestCase):
         Check against multiple images
         """
         self.assertEqual(
-            extract_markdown_images(
-                "![dog](dog.jpg) some text ![cat](cat.jpg)"),
+            MarkdownNodes.extract_markdown_images(
+                "![dog](dog.jpg) some text ![cat](cat.jpg)"
+            ),
             [("dog", "dog.jpg"), ("cat", "cat.jpg")],
         )
 
@@ -408,15 +404,16 @@ class TestExtractMarkdownImages(unittest.TestCase):
         """
         Check against empty strings for image
         """
-        self.assertEqual(extract_markdown_images(""), [])
+        self.assertEqual(MarkdownNodes.extract_markdown_images(""), [])
 
     def test_image_with_spaces_in_alt_text(self):
         """
         Check against space in alt_text
         """
         self.assertEqual(
-            extract_markdown_images(
-                "![cute fluffy cat](https://cats.com/fluffy.jpg)"),
+            MarkdownNodes.extract_markdown_images(
+                "![cute fluffy cat](https://cats.com/fluffy.jpg)"
+            ),
             [("cute fluffy cat", "https://cats.com/fluffy.jpg")],
         )
 
@@ -425,7 +422,7 @@ class TestExtractMarkdownImages(unittest.TestCase):
         Check against a complex url and special characters
         """
         self.assertEqual(
-            extract_markdown_images(
+            MarkdownNodes.extract_markdown_images(
                 "![test](https://example.com/path?id=123&type=.jpg)"
             ),
             [("test", "https://example.com/path?id=123&type=.jpg")],
@@ -442,7 +439,8 @@ class TestExtractMarkdownLinks(unittest.TestCase):
         Check against a simple link
         """
         self.assertEqual(
-            extract_markdown_links("[Boot.dev](https://boot.dev)"),
+            MarkdownNodes.extract_markdown_links(
+                "[Boot.dev](https://boot.dev)"),
             [("Boot.dev", "https://boot.dev")],
         )
 
@@ -451,7 +449,7 @@ class TestExtractMarkdownLinks(unittest.TestCase):
         Check against multiple links
         """
         self.assertEqual(
-            extract_markdown_links(
+            MarkdownNodes.extract_markdown_links(
                 "Check out [Python](https://python.org) and [Go](https://go.dev)"
             ),
             [("Python", "https://python.org"), ("Go", "https://go.dev")],
@@ -462,7 +460,8 @@ class TestExtractMarkdownLinks(unittest.TestCase):
         Check against image link combination
         """
         self.assertEqual(
-            extract_markdown_links("![img](img.jpg) [link](url.com)"),
+            MarkdownNodes.extract_markdown_links(
+                "![img](img.jpg) [link](url.com)"),
             [("link", "url.com")],
         )
 
@@ -471,8 +470,9 @@ class TestExtractMarkdownLinks(unittest.TestCase):
         Check against link including special characters
         """
         self.assertEqual(
-            extract_markdown_links(
-                "[query](https://api.com/data?id=123&type=json)"),
+            MarkdownNodes.extract_markdown_links(
+                "[query](https://api.com/data?id=123&type=json)"
+            ),
             [("query", "https://api.com/data?id=123&type=json")],
         )
 
@@ -480,7 +480,7 @@ class TestExtractMarkdownLinks(unittest.TestCase):
         """
         Check against empty string
         """
-        self.assertEqual(extract_markdown_links(""), [])
+        self.assertEqual(MarkdownNodes.extract_markdown_links(""), [])
 
     def test_complex_mix_links_images(self):
         """
@@ -492,7 +492,7 @@ class TestExtractMarkdownLinks(unittest.TestCase):
             r"[third](https://third.com)"
         )
         self.assertEqual(
-            extract_markdown_links(string),
+            MarkdownNodes.extract_markdown_links(string),
             [
                 ("first", "https://first.com"),
                 ("second", "https://second.com"),
@@ -511,7 +511,7 @@ class TestSplitNodesImage(unittest.TestCase):
         Check against simple image
         """
         node = TextNode("Hello ![alt](src) World", {TextType.NORMAL})
-        nodes = split_nodes_image([node])
+        nodes = MarkdownNodes.split_nodes_image([node])
         self.assertEqual(len(nodes), 3)
         self.assertEqual(nodes[0].content, "Hello ", {TextType.NORMAL})
         self.assertEqual(nodes[1].content, "alt", {TextType.NORMAL})
@@ -525,7 +525,7 @@ class TestSplitNodesImage(unittest.TestCase):
         node = TextNode(
             "Start ![alt1](src1) middle ![alt2](src2) end", {TextType.NORMAL}
         )
-        nodes = split_nodes_image([node])
+        nodes = MarkdownNodes.split_nodes_image([node])
         self.assertEqual(len(nodes), 5)
         self.assertEqual(nodes[0].content, "Start ", {TextType.NORMAL})
         self.assertEqual(nodes[1].content, "alt1", {TextType.NORMAL})
@@ -540,7 +540,7 @@ class TestSplitNodesImage(unittest.TestCase):
         Check against no image
         """
         node = TextNode("Just plain text without images", {TextType.NORMAL})
-        nodes = split_nodes_image([node])
+        nodes = MarkdownNodes.split_nodes_image([node])
         self.assertEqual(len(nodes), 1)
         self.assertEqual(
             nodes[0].content, "Just plain text without images", {
@@ -553,7 +553,7 @@ class TestSplitNodesImage(unittest.TestCase):
         Check against adjacent images
         """
         node = TextNode("![alt1](src1)![alt2](src2)", {TextType.NORMAL})
-        nodes = split_nodes_image([node])
+        nodes = MarkdownNodes.split_nodes_image([node])
         self.assertEqual(len(nodes), 2)
         self.assertEqual(nodes[0].content, "alt1", {TextType.NORMAL})
         self.assertEqual(nodes[1].content, "alt2", {TextType.NORMAL})
@@ -565,7 +565,7 @@ class TestSplitNodesImage(unittest.TestCase):
         Check against image with empty text
         """
         node = TextNode("![](src)", {TextType.NORMAL})
-        nodes = split_nodes_image([node])
+        nodes = MarkdownNodes.split_nodes_image([node])
         self.assertEqual(len(nodes), 1)
 
 
@@ -579,7 +579,7 @@ class TestSplitNodesLink(unittest.TestCase):
         Check against simple link
         """
         node = TextNode("Hello [text](url) World", {TextType.NORMAL})
-        nodes = split_nodes_link([node])
+        nodes = MarkdownNodes.split_nodes_link([node])
         self.assertEqual(len(nodes), 3)
         self.assertEqual(nodes[0].content, "Hello ", {TextType.NORMAL})
         self.assertEqual(nodes[1].content, "text", {TextType.NORMAL})
@@ -594,7 +594,7 @@ class TestSplitNodesLink(unittest.TestCase):
             "Check [this link!@#$](https://test.com/!@#$) here", {
                 TextType.NORMAL}
         )
-        nodes = split_nodes_link([node])
+        nodes = MarkdownNodes.split_nodes_link([node])
         self.assertEqual(len(nodes), 3)
         self.assertEqual(nodes[0].content, "Check ", {TextType.NORMAL})
         self.assertEqual(nodes[1].content, "this link!@#$", {TextType.NORMAL})
@@ -611,7 +611,7 @@ class TestSplitNodesLink(unittest.TestCase):
             "Check out our [Python Course](https://boot.dev/learn/learn-python) - it's great!",
             {TextType.NORMAL},
         )
-        nodes = split_nodes_link([node])
+        nodes = MarkdownNodes.split_nodes_link([node])
         self.assertEqual(len(nodes), 3)
         self.assertEqual(nodes[0].content, "Check out our ", {TextType.NORMAL})
         self.assertEqual(nodes[1].content, "Python Course", {TextType.NORMAL})
@@ -627,7 +627,7 @@ class TestSplitNodesLink(unittest.TestCase):
         Check against link at start and end of TextNode
         """
         node = TextNode("[start](url1)middle[end](url2)", {TextType.NORMAL})
-        nodes = split_nodes_link([node])
+        nodes = MarkdownNodes.split_nodes_link([node])
         self.assertEqual(len(nodes), 3)
         self.assertEqual(nodes[0].content, "start", {TextType.NORMAL})
         self.assertEqual(nodes[0].url, "url1", {TextType.NORMAL})
@@ -644,7 +644,7 @@ class TestSplitNodesLink(unittest.TestCase):
             TextNode("plain text", {TextType.NORMAL}),
             TextNode("[link2](url2)", {TextType.NORMAL}),
         ]
-        result = split_nodes_link(nodes)
+        result = MarkdownNodes.split_nodes_link(nodes)
         self.assertEqual(len(result), 3)
         self.assertEqual(result[0].content, "link1", {TextType.NORMAL})
         self.assertEqual(result[0].url, "url1", {TextType.NORMAL})
@@ -663,7 +663,7 @@ class TestValidateTextnodes(unittest.TestCase):
         Check against empty nodes
         """
         with self.assertRaises(ValueError) as context:
-            validate_textnodes([])
+            MarkdownNodes.validate_textnodes([])
         # Optionally check the error message
         self.assertTrue("Nodes list cannot be empty" in str(context.exception))
 
@@ -673,7 +673,7 @@ class TestValidateTextnodes(unittest.TestCase):
         """
         node = TextNode("Hello world", TextType.NORMAL)
         with self.assertRaises(ValueError) as context:
-            validate_textnodes(node)
+            MarkdownNodes.validate_textnodes(node)
         # Optionally check the error message
         self.assertTrue(
             "Nodes must be provided as a list" in str(context.exception))
@@ -684,7 +684,7 @@ class TestValidateTextnodes(unittest.TestCase):
         """
         node = "node"
         with self.assertRaises(TypeError) as context:
-            validate_textnodes([node, "A normal string"])
+            MarkdownNodes.validate_textnodes([node, "A normal string"])
         # Optionally check the error message
         self.assertTrue(
             f"Invalid node detected: {
@@ -698,7 +698,7 @@ class TestValidateTextnodes(unittest.TestCase):
         """
         node = [TextNode("Hello world", styles={"test"})]
         with self.assertRaises(ValueError) as context:
-            validate_textnodes(node)
+            MarkdownNodes.validate_textnodes(node)
         # Optionally check the error message
         self.assertTrue(
             f"TextNode type {node[0].styles} is not a valid TextType"
@@ -711,7 +711,7 @@ class TestValidateTextnodes(unittest.TestCase):
         """
         node = [TextNode("Hello world", {TextType.IMAGE})]
         with self.assertRaises(ValueError) as context:
-            validate_textnodes(node)
+            MarkdownNodes.validate_textnodes(node)
         # Optionally check the error message
         self.assertTrue(
             f"TextNode of type {
@@ -730,7 +730,7 @@ class TestFindDelimitersFirstPosition(unittest.TestCase):
         Check against simple case
         """
         input_text = "*    **"
-        a, b, c, d = find_delimiters_first_position(input_text)
+        a, b, c, d = MarkdownNodes.find_delimiters_first_position(input_text)
         self.assertEqual(a, 0)
         self.assertEqual(b, 5)
         self.assertEqual(c, -1)
@@ -741,7 +741,7 @@ class TestFindDelimitersFirstPosition(unittest.TestCase):
         Check against all asterisk case
         """
         input_text = "*   ** ***"
-        a, b, c, d = find_delimiters_first_position(input_text)
+        a, b, c, d = MarkdownNodes.find_delimiters_first_position(input_text)
         self.assertEqual(a, 0)
         self.assertEqual(b, 4)
         self.assertEqual(c, 7)
@@ -752,7 +752,7 @@ class TestFindDelimitersFirstPosition(unittest.TestCase):
         Check against all existing delimiters
         """
         input_text = "** *  ` ***"
-        a, b, c, d = find_delimiters_first_position(input_text)
+        a, b, c, d = MarkdownNodes.find_delimiters_first_position(input_text)
         self.assertEqual(a, 3)
         self.assertEqual(b, 0)
         self.assertEqual(c, 8)
@@ -769,7 +769,7 @@ class TestFindMatchingDelimiters(unittest.TestCase):
         Check against simple case
         """
         input_text = "*    *"
-        a = find_matching_delimiter(input_text, "*", 0)
+        a = MarkdownNodes.find_matching_delimiter(input_text, "*", 0)
         self.assertEqual(a, 5)
 
     def test_all_asterisk(self):
@@ -777,9 +777,9 @@ class TestFindMatchingDelimiters(unittest.TestCase):
         Check against all asterisk case
         """
         input_text = "*   **  ** * *** ***"
-        a = find_matching_delimiter(input_text, "*", 0)
-        b = find_matching_delimiter(input_text, "**", 4)
-        c = find_matching_delimiter(input_text, "***", 13)
+        a = MarkdownNodes.find_matching_delimiter(input_text, "*", 0)
+        b = MarkdownNodes.find_matching_delimiter(input_text, "**", 4)
+        c = MarkdownNodes.find_matching_delimiter(input_text, "***", 13)
 
         self.assertEqual(a, 11)
         self.assertEqual(b, 8)
@@ -790,11 +790,15 @@ class TestFindMatchingDelimiters(unittest.TestCase):
         Check against all existing delimiters
         """
         input_text = "** *  ` *** *    *** ** `"
-        a = find_matching_delimiter(input_text, "*", 3)
-        b = find_matching_delimiter(input_text, "**", 0)
-        c = find_matching_delimiter(input_text, "***", 8)
-        d = find_matching_delimiter(input_text, "`", 6)
+        a = MarkdownNodes.find_matching_delimiter(input_text, "*", 3)
+        b = MarkdownNodes.find_matching_delimiter(input_text, "**", 0)
+        c = MarkdownNodes.find_matching_delimiter(input_text, "***", 8)
+        d = MarkdownNodes.find_matching_delimiter(input_text, "`", 6)
         self.assertEqual(a, 12)
         self.assertEqual(b, 21)
         self.assertEqual(c, 17)
         self.assertEqual(d, 24)
+
+
+if __name__ == "__main__":
+    unittest.main()
