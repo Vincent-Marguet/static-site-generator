@@ -25,32 +25,38 @@ class TextNode:
     Class to handle TextNode
     """
 
-    def __init__(self, text, text_type, url=None) -> None:
-        self._text = text
-        self._text_type = text_type
+    def __init__(self, content, styles, url=None) -> None:
+        self._content = content
+        self.styles = styles
         self._url = url
 
     @property
-    def text(self):
+    def content(self):
         """
-        Getter for text member
+        Getter for content member
         """
-        return self._text
+        return self._content
 
-    @text.setter
-    def text(self, text):
-        self._text = text
+    @content.setter
+    def content(self, content):
+        self._content = content
 
     @property
-    def text_type(self):
+    def styles(self):
         """
-        Getter for text_type member
+        Getter for styles member
         """
-        return self._text_type
+        return self._styles
 
-    @text_type.setter
-    def text_type(self, text_type):
-        self._text_type = text_type
+    @styles.setter
+    def styles(self, styles):
+        if isinstance(styles, set):
+            self._styles = styles
+        elif styles is None:
+            self._styles = set()
+        else:
+            # If it's a single TextType, create a set with just that type
+            self._styles = {styles}
 
     @property
     def url(self):
@@ -64,13 +70,13 @@ class TextNode:
         self._url = url
 
     def __eq__(self, other):
-        if (
-            self.text == other.text
-            and self.text_type == other.text_type
+        return (
+            self.content == other.content
+            and self.styles == other.styles
             and self.url == other.url
-        ):
-            return True
-        return False
+        )
 
     def __repr__(self):
-        return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
+        # Get style_type from the set
+        style = next(iter(self._styles))
+        return f"TextNode({self.content}, {style.value}, {self.url})"
