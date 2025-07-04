@@ -234,6 +234,34 @@ class TestTextToTextNodes(unittest.TestCase):
         ]
         self.assertEqual(expected, MarkdownNodes.text_to_textnodes(input_text))
 
+    def test_more_complex_for_fun(self):
+        """
+        Check against asterisks and underscores in the same string
+        """
+        input_text = "**Tricky _string_ to** __test__"
+        expected = [
+            TextNode("Tricky ", {TextType.BOLD}),
+            TextNode("string", {TextType.ITALIC, TextType.BOLD}),
+            TextNode(" to", {TextType.BOLD}),
+            TextNode(" ", {TextType.NORMAL}),
+            TextNode("test", {TextType.BOLD}),
+        ]
+        self.assertEqual(expected, MarkdownNodes.text_to_textnodes(input_text))
+
+    def test_even_more_complex_for_fun(self):
+        """
+        Check against asterisks and underscores in the same string
+        """
+        input_text = "*Tricky __string__ to* _test_"
+        expected = [
+            TextNode("Tricky ", {TextType.ITALIC}),
+            TextNode("string", {TextType.ITALIC, TextType.BOLD}),
+            TextNode(" to", {TextType.ITALIC}),
+            TextNode(" ", {TextType.NORMAL}),
+            TextNode("test", {TextType.ITALIC}),
+        ]
+        self.assertEqual(expected, MarkdownNodes.text_to_textnodes(input_text))
+
 
 class TestSplitNodesDelimiter(unittest.TestCase):
     """
@@ -730,33 +758,42 @@ class TestFindDelimitersFirstPosition(unittest.TestCase):
         Check against simple case
         """
         input_text = "*    **"
-        a, b, c, d = MarkdownNodes.find_delimiters_first_position(input_text)
-        self.assertEqual(a, 0)
-        self.assertEqual(b, 5)
-        self.assertEqual(c, -1)
+        a, b, c, d, e, f = MarkdownNodes.find_delimiters_first_position(
+            input_text)
+        self.assertEqual(a, -1)
+        self.assertEqual(b, -1)
+        self.assertEqual(c, 5)
         self.assertEqual(d, -1)
+        self.assertEqual(e, 0)
+        self.assertEqual(f, -1)
 
     def test_all_asterisk(self):
         """
         Check against all asterisk case
         """
         input_text = "*   ** ***"
-        a, b, c, d = MarkdownNodes.find_delimiters_first_position(input_text)
-        self.assertEqual(a, 0)
-        self.assertEqual(b, 4)
-        self.assertEqual(c, 7)
+        a, b, c, d, e, f = MarkdownNodes.find_delimiters_first_position(
+            input_text)
+        self.assertEqual(a, -1)
+        self.assertEqual(b, 7)
+        self.assertEqual(c, 4)
         self.assertEqual(d, -1)
+        self.assertEqual(e, 0)
+        self.assertEqual(f, -1)
 
     def test_all_delimiters(self):
         """
         Check against all existing delimiters
         """
-        input_text = "** *  ` ***"
-        a, b, c, d = MarkdownNodes.find_delimiters_first_position(input_text)
-        self.assertEqual(a, 3)
-        self.assertEqual(b, 0)
-        self.assertEqual(c, 8)
-        self.assertEqual(d, 6)
+        input_text = "** * _ ` *** __"
+        a, b, c, d, e, f = MarkdownNodes.find_delimiters_first_position(
+            input_text)
+        self.assertEqual(a, 7)
+        self.assertEqual(b, 9)
+        self.assertEqual(c, 0)
+        self.assertEqual(d, 13)
+        self.assertEqual(e, 3)
+        self.assertEqual(f, 5)
 
 
 class TestFindMatchingDelimiters(unittest.TestCase):

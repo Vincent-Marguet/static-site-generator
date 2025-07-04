@@ -9,7 +9,7 @@ from enum import Enum
 
 class TextType(Enum):
     """
-    Simple Enum to enumerate all type of inline text
+    Simple Enum for all type of inline text
     """
 
     NORMAL = "normal"

@@ -5,7 +5,9 @@ Test module for converter.py functions
 import unittest
 
 from converter import (
+    BlockType,
     block_to_block_type,
+    extract_title,
     markdown_to_blocks,
     markdown_to_html_node,
     text_node_to_html,
@@ -176,43 +178,44 @@ class TestBlockToBlockType(unittest.TestCase):
         Checking against simple header
         """
         block = "## This is a heading"
-        self.assertEqual(block_to_block_type(block), "heading")
+        self.assertEqual(block_to_block_type(block), BlockType.HEADING)
 
     def test_code_block(self):
         """
         Checking against simple code block
         """
         block = "```\ndef hello():\n    print('world')\n```"
-        self.assertEqual(block_to_block_type(block), "code")
+        self.assertEqual(block_to_block_type(block), BlockType.CODE)
 
     def test_quote(self):
         """
         Checking against simple quote block
         """
         block = "> First line\n> Second line\n> Third line"
-        self.assertEqual(block_to_block_type(block), "quote")
+        self.assertEqual(block_to_block_type(block), BlockType.QUOTE)
 
     def test_unordered_list(self):
         """
         Checking against simple unordered_list
         """
         block = "* First item\n* Second item\n* Third item"
-        self.assertEqual(block_to_block_type(block), "unordered_list")
+        self.assertEqual(block_to_block_type(block), BlockType.UNORDERED_LIST)
 
     def test_ordered_list(self):
         """
         Checking against simple ordered_list
         """
         block = "1. First item\n2. Second item\n3. Third item"
-        self.assertEqual(block_to_block_type(block), "ordered_list")
+        self.assertEqual(block_to_block_type(block), BlockType.ORDERED_LIST)
 
     def test_heading_blocks(self):
         """
         Check against different header blocks
         """
-        self.assertEqual(block_to_block_type("# Heading"), "heading")
-        self.assertEqual(block_to_block_type("###### H6"), "heading")
-        self.assertEqual(block_to_block_type("#not_a_heading"), "paragraph")
+        self.assertEqual(block_to_block_type("# Heading"), BlockType.HEADING)
+        self.assertEqual(block_to_block_type("###### H6"), BlockType.HEADING)
+        self.assertEqual(block_to_block_type(
+            "#not_a_heading"), BlockType.PARAGRAPH)
 
     def test_code_blocks(self):
         """
@@ -220,55 +223,62 @@ class TestBlockToBlockType(unittest.TestCase):
         """
         self.assertEqual(
             block_to_block_type(
-                "```\n`inline code`\n* not a list\n```"), "code"
+                "```\n`inline code`\n* not a list\n```"), BlockType.CODE
         )
-        self.assertEqual(block_to_block_type("```\nsome code\n```"), "code")
+        self.assertEqual(block_to_block_type(
+            "```\nsome code\n```"), BlockType.CODE)
 
     def test_quote_blocks(self):
         """
         Check against different quote blocks
         """
-        self.assertEqual(block_to_block_type(
-            ">first line\n>second line"), "quote")
         self.assertEqual(
-            block_to_block_type(">### Not a heading\n>* Not a list"), "quote"
+            block_to_block_type(">first line\n>second line"), BlockType.QUOTE
+        )
+        self.assertEqual(
+            block_to_block_type(
+                ">### Not a heading\n>* Not a list"), BlockType.QUOTE
         )
 
     def test_unordered_list_blocks(self):
         """
         Check against different unordered_list blocks
         """
-        self.assertEqual(block_to_block_type(
-            "* first\n* second"), "unordered_list")
-        self.assertEqual(block_to_block_type(
-            "- first\n- second"), "unordered_list")
         self.assertEqual(
-            block_to_block_type(
-                "* `code` in list\n* #not heading"), "unordered_list"
+            block_to_block_type("* first\n* second"), BlockType.UNORDERED_LIST
+        )
+        self.assertEqual(
+            block_to_block_type("- first\n- second"), BlockType.UNORDERED_LIST
+        )
+        self.assertEqual(
+            block_to_block_type("* `code` in list\n* #not heading"),
+            BlockType.UNORDERED_LIST,
         )
 
     def test_ordered_list_blocks(self):
         """
         Check against different ordered_list blocks
         """
-        self.assertEqual(block_to_block_type(
-            "1. First\n2. Second"), "ordered_list")
         self.assertEqual(
-            block_to_block_type(
-                "1. First (note)\n2. Second [link]"), "ordered_list"
+            block_to_block_type("1. First\n2. Second"), BlockType.ORDERED_LIST
+        )
+        self.assertEqual(
+            block_to_block_type("1. First (note)\n2. Second [link]"),
+            BlockType.ORDERED_LIST,
         )
         self.assertEqual(block_to_block_type(
-            "1. First\n3. Third"), "paragraph")
+            "1. First\n3. Third"), BlockType.PARAGRAPH)
 
     def test_paragraph_blocks(self):
         """
         Check against different paragraph blocks
         """
-        self.assertEqual(block_to_block_type(
-            "just a normal paragraph"), "paragraph")
         self.assertEqual(
-            block_to_block_type(
-                "1. not a list because no second item"), "paragraph"
+            block_to_block_type("just a normal paragraph"), BlockType.PARAGRAPH
+        )
+        self.assertEqual(
+            block_to_block_type("1. not a list because no second item"),
+            BlockType.PARAGRAPH,
         )
 
 
@@ -378,6 +388,56 @@ class TestMarkdownToHTML(unittest.TestCase):
 
         # Assert equality
         self.assertEqual(result_html, expected_html)
+
+
+class ExtractTitle(unittest.TestCase):
+    """
+    Test class for extract_title function
+    """
+
+    def test_simple_markdown_text(self):
+        """
+        Check against a simple markdown text
+        """
+        text = "# Welcome to the Dungeon\nSome introductory text"
+        result = extract_title(text)
+        expected = "Welcome to the Dungeon"
+        self.assertEqual(result, expected)
+
+    def test_title_in_the_middle_in_markdown_text(self):
+        """
+        Check against a H1 title in the middle of a markdown text
+        """
+        text = "One truly random sentence\n# Welcome to the Dungeon\nSome introductory text"
+        result = extract_title(text)
+        expected = "Welcome to the Dungeon"
+        self.assertEqual(result, expected)
+
+    def test_no_h1_title_in_markdown_text(self):
+        """
+        Check against no H1 in markdown text
+        """
+        text = "### One truly random sentence\n## Welcome to the Dungeon\nSome introductory text"
+        with self.assertRaises(ValueError):
+            extract_title(text)
+
+    def test_no_title_in_markdown_text(self):
+        """
+        Check against no title in markdown text
+        """
+        text = (
+            "One truly random sentence\n Welcome to the Dungeon\nSome introductory text"
+        )
+        with self.assertRaises(ValueError):
+            extract_title(text)
+
+    def test_empty_markdown_text(self):
+        """
+        Check against an empty markdown text
+        """
+        text = ""
+        with self.assertRaises(ValueError):
+            extract_title(text)
 
 
 if __name__ == "__main__":

@@ -1,16 +1,28 @@
 """
 This module hold converting between format functions
 and some associated helper functions
-Regexes in place are documented in their respective
-implementation
 """
 
 import re
+from enum import Enum
 
 from leafnode import LeafNode
 from markdownnode import MarkdownNodes
 from parentnode import ParentNode
 from textnode import TextNode, TextType
+
+
+class BlockType(Enum):
+    """
+    Simple enum for block types
+    """
+
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
+    PARAGRAPH = "paragraph"
 
 
 def text_node_to_html(text_node: TextNode):
@@ -62,7 +74,7 @@ def markdown_to_blocks(markdown_text):
 
 def block_to_block_type(block):
     """
-    Take a block and return a string block type.
+    Take a block and return a BlockType enum.
     - heading starts with 1 to 6 "#" and a space
     - code start with "```" and end with "```"
     - quote has > at each start of line in the block
@@ -73,24 +85,24 @@ def block_to_block_type(block):
     lines = block.split("\n")
 
     if re.findall(r"^#{1,6}\s", block):
-        return "heading"
+        return BlockType.HEADING
 
     if block.startswith("```") and block.endswith("```"):
-        return "code"
+        return BlockType.CODE
 
     if all(line.startswith(">") for line in lines):
-        return "quote"
+        return BlockType.QUOTE
 
     if all(line.startswith(("*", "-")) and line[1:2] == " " for line in lines):
-        return "unordered_list"
+        return BlockType.UNORDERED_LIST
 
     if len(lines) > 1 and all(
         line[0].isdigit() and line.startswith(f"{i+1}. ")
         for i, line in enumerate(lines)
     ):
-        return "ordered_list"
+        return BlockType.ORDERED_LIST
 
-    return "paragraph"
+    return BlockType.PARAGRAPH
 
 
 def markdown_to_html_node(markdown_text):
@@ -108,7 +120,7 @@ def markdown_to_html_node(markdown_text):
     all_nodes = []
 
     # Heading case
-    if block_type == "heading":
+    if block_type == BlockType.HEADING:
         text_nodes = MarkdownNodes.text_to_textnodes(
             blocks[0].lstrip("#").lstrip())
         html_nodes = [text_node_to_html(node) for node in text_nodes]
@@ -120,7 +132,7 @@ def markdown_to_html_node(markdown_text):
         )
 
     # Code case
-    elif block_type == "code":
+    elif block_type == BlockType.CODE:
         text_nodes = MarkdownNodes.text_to_textnodes(
             blocks[0].lstrip("```").rstrip("```").strip()
         )
@@ -129,14 +141,14 @@ def markdown_to_html_node(markdown_text):
         all_nodes.append(ParentNode(tag="pre", children=[code_node]))
 
     # Quote case
-    elif block_type == "quote":
+    elif block_type == BlockType.QUOTE:
         text_nodes = MarkdownNodes.text_to_textnodes(
             blocks[0].lstrip(">").lstrip())
         html_nodes = [text_node_to_html(node) for node in text_nodes]
         all_nodes.append(ParentNode(tag="blockquote", children=html_nodes))
 
     # Unordered list case
-    elif block_type == "unordered_list":
+    elif block_type == BlockType.UNORDERED_LIST:
         li_nodes = []
         items = blocks[0].split("\n")
         for item in items:
@@ -148,7 +160,7 @@ def markdown_to_html_node(markdown_text):
         all_nodes.append(ParentNode(tag="ul", children=li_nodes))
 
     # Ordered list case
-    elif block_type == "ordered_list":
+    elif block_type == BlockType.ORDERED_LIST:
         li_nodes = []
         items = blocks[0].split("\n")
         for item in items:
@@ -171,3 +183,13 @@ def markdown_to_html_node(markdown_text):
         all_nodes = all_nodes + next_node.children
 
     return ParentNode(tag="div", children=all_nodes)
+
+
+def extract_title(markdown_text):
+    """
+    Extract the main title starting with a single '#'
+    """
+    for line in markdown_text.split("\n"):
+        if line.startswith("# ", 0, 2) and not line.startswith("## "):
+            return line[2:].strip()
+    raise ValueError("No H1 title found")

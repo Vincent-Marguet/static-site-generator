@@ -1,5 +1,7 @@
 """
 This module hold the class MarkDownNodes
+Regexes in place are documented in their respective
+implementation
 """
 
 import re
@@ -140,26 +142,18 @@ class MarkdownNodes(BaseNodes):
 
         def split_text(text, current_styles):
             """
-            Split text based on first delimiter found (*, **, *** or `),
+            Split text based on first delimiter found (*, **, ***, _, __, or `),
             create TextNodes with appropriate combined styles
             """
             # Base case
             if not text:
                 return []
 
-            first_single, first_double, first_triple, first_backtick = (
-                cls.find_delimiters_first_position(text)
-            )
             # No delimiters found
-            if (
-                first_single == -1
-                and first_double == -1
-                and first_triple == -1
-                and first_backtick == -1
-            ):
+            positions = cls.find_delimiters_first_position(text)
+            if all(pos == -1 for pos in positions):
                 return [TextNode(text, current_styles or {TextType.NORMAL})]
 
-            first_pos = -1
             delimiter = None
             new_style = None
             # Determine which delimiter comes first and what style to apply.
@@ -169,32 +163,90 @@ class MarkdownNodes(BaseNodes):
             # These styles are applied by the apply_style helper function.
             # So we really want to call extend on the between_text if and only if between_style
             # is either {TextType.ITALIC} or {TextType.BOLD} in case they are nested in one another.
-            if (
-                first_backtick != -1
-                and (first_backtick < first_single or first_single == -1)
-                and (first_backtick < first_double or first_double == -1)
+            # Here we indicate the tuple positions :
+            #     first_backtick = positions[0]
+            #     first_triple_asterisk = positions[1]
+            #     first_double_asterisk = positions[2]
+            #     first_double_underscore = positions[3]
+            #     first_single_asterisk = positions[4]
+            #     first_single_underscore = positions[5]
+
+            if cls.is_first_position(
+                positions[0],
+                [
+                    positions[1],
+                    positions[2],
+                    positions[3],
+                    positions[4],
+                    positions[5],
+                ],
             ):
-                first_pos = first_backtick
+                first_pos = positions[0]
                 delimiter = "`"
 
-            elif (
-                first_triple != -1
-                and (first_triple < first_single or first_single == -1)
-                and (first_triple < first_double or first_double == -1)
+            elif cls.is_first_position(
+                positions[1],
+                [
+                    positions[0],
+                    positions[2],
+                    positions[3],
+                    positions[4],
+                    positions[5],
+                ],
             ):
-                first_pos = first_triple
+                first_pos = positions[1]
                 delimiter = "***"
 
-            elif first_double != -1 and (
-                first_double < first_single or first_single == -1
+            elif cls.is_first_position(
+                positions[2],
+                [
+                    positions[0],
+                    positions[1],
+                    positions[3],
+                    positions[4],
+                    positions[5],
+                ],
             ):
-                first_pos = first_double
+                first_pos = positions[2]
                 delimiter = "**"
                 new_style = TextType.BOLD
-            else:
-                first_pos = first_single
+
+            elif cls.is_first_position(
+                positions[3],
+                [
+                    positions[0],
+                    positions[1],
+                    positions[2],
+                    positions[4],
+                    positions[5],
+                ],
+            ):
+                first_pos = positions[3]
+                delimiter = "__"
+                new_style = TextType.BOLD
+
+            elif cls.is_first_position(
+                positions[4],
+                [
+                    positions[0],
+                    positions[1],
+                    positions[2],
+                    positions[3],
+                    positions[5],
+                ],
+            ):
+                first_pos = positions[4]
                 delimiter = "*"
                 new_style = TextType.ITALIC
+
+            else:
+                first_pos = positions[5]
+                delimiter = "_"
+                new_style = TextType.ITALIC
+
+            if first_pos == -1:
+                # No delimiter found, return the text as-is
+                return [TextNode(text, current_styles or {TextType.NORMAL})]
 
             second_pos = cls.find_matching_delimiter(
                 text, delimiter, first_pos)
@@ -213,7 +265,7 @@ class MarkdownNodes(BaseNodes):
             between_styles = cls.apply_style(
                 delimiter, current_styles, new_style)
 
-            if between_styles in ({TextType.CODE}, {TextType.BOLD, TextType.ITALIC}):
+            if between_styles == {TextType.CODE}:
                 # We add the node and go directly to extend on the remaining_text
                 nodes.append(TextNode(between_text, between_styles))
             else:
@@ -284,23 +336,35 @@ class MarkdownNodes(BaseNodes):
         in split_nodes_delimiter function
         """
         # Find first occurrence of each delimiter
-        first_triple = text.find("***")
-        first_double = text.find("**")
-        first_single = text.find("*")
+        first_triple_asterisk = text.find("***")
+        first_double_asterisk = text.find("**")
+        first_single_asterisk = text.find("*")
         first_backtick = text.find("`")
+        first_single_underscore = text.find("_")
+        first_double_underscore = text.find("__")
 
-        # Ensure single * is not part of a double/triple
+        # Ensure single * or _ is not part of a double/triple
         # and adjust search position accordingly
-        if first_single == first_double:
-            first_single = text.find("*", first_double + 2)
-        if first_single == first_triple:
-            first_single = text.find("*", first_triple + 3)
+        if first_single_asterisk == first_double_asterisk:
+            first_single_asterisk = text.find("*", first_double_asterisk + 2)
+        if first_single_asterisk == first_triple_asterisk:
+            first_single_asterisk = text.find("*", first_triple_asterisk + 3)
+        if first_single_underscore == first_double_underscore:
+            first_single_underscore = text.find(
+                "_", first_double_underscore + 2)
         # Ensure double * is not part of triple
         # and adjust search position accordingly
-        if first_double == first_triple:
-            first_double = text.find("**", first_triple + 3)
+        if first_double_asterisk == first_triple_asterisk:
+            first_double_asterisk = text.find("**", first_triple_asterisk + 3)
 
-        return first_single, first_double, first_triple, first_backtick
+        return (
+            first_backtick,
+            first_triple_asterisk,
+            first_double_asterisk,
+            first_double_underscore,
+            first_single_asterisk,
+            first_single_underscore,
+        )
 
     @classmethod
     def find_matching_delimiter(cls, text, delimiter, first_pos):
@@ -308,25 +372,50 @@ class MarkdownNodes(BaseNodes):
         Find the matching delimiter for first_pos in text
         """
         # Find matching delimiter
-        if delimiter == "*":
+        if delimiter == "_":
+            second_pos = text.find(delimiter, first_pos + len(delimiter))
+            # In case of single _ keeps searching till next valid single
+            while second_pos != -1 and not cls.is_valid_single_underscore(
+                text, second_pos
+            ):
+                second_pos = text.find(delimiter, second_pos + 1)
+
+        elif delimiter == "__":
+            second_pos = text.find(delimiter, first_pos + len(delimiter))
+            while second_pos != -1 and not cls.is_valid_double_underscore(
+                text, second_pos
+            ):
+                second_pos = text.find(delimiter, second_pos + 1)
+        elif delimiter == "*":
             second_pos = text.find(delimiter, first_pos + len(delimiter))
             # In case of single * keeps searching till next valid single
             while second_pos != -1 and not cls.is_valid_single_asterisk(
                 text, second_pos
             ):
                 second_pos = text.find(delimiter, second_pos + 1)
+
         elif delimiter == "**":
             second_pos = text.find(delimiter, first_pos + len(delimiter))
             while second_pos != -1 and not cls.is_valid_double_asterisk(
                 text, second_pos
             ):
                 second_pos = text.find(delimiter, second_pos + 1)
+
         else:
             second_pos = text.find(delimiter, first_pos + len(delimiter))
 
         if second_pos == -1:
             raise ValueError(f"No matching delimiter {delimiter}")
         return second_pos
+
+    @classmethod
+    def is_first_position(cls, pos, other_positions):
+        """
+        Return True if pos is valid and comes before all other valid positions
+        """
+        if pos == -1:
+            return False
+        return all(pos < other_pos or other_pos == -1 for other_pos in other_positions)
 
     @classmethod
     def is_valid_single_asterisk(cls, text, pos):
@@ -363,6 +452,45 @@ class MarkdownNodes(BaseNodes):
 
         # Check forwards
         if pos < len(text) - 2 and text[pos + 2] == "*" and text[pos + 1] == "*":
+            return False
+
+        return True
+
+    @classmethod
+    def is_valid_single_underscore(cls, text, pos):
+        """
+        Check if the underscore at position pos is a valid single underscore
+        (not part of double or triple).
+        """
+        # Check backwards
+        if pos > 0 and text[pos - 1] == "_":
+            return False
+        if pos > 1 and text[pos - 2] == "_" and text[pos - 1] == "_":
+            return False
+
+        # Check forwards
+        if pos < len(text) - 1 and text[pos + 1] == "_":
+            return False
+        if pos < len(text) - 2 and text[pos + 2] == "_" and text[pos + 1] == "_":
+            return False
+
+        return True
+
+    @classmethod
+    def is_valid_double_underscore(cls, text, pos):
+        """
+        Check if the underscore at position pos is a valid double underscore
+        (not part of triple).
+        """
+        # Check backwards
+        if pos > 0 and text[pos - 1] == "_":
+            return False
+
+        if pos > 1 and text[pos - 2] == "_" and text[pos - 1] == "_":
+            return False
+
+        # Check forwards
+        if pos < len(text) - 2 and text[pos + 2] == "_" and text[pos + 1] == "_":
             return False
 
         return True
