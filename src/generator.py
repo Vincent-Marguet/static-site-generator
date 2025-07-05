@@ -6,8 +6,8 @@ to read file safely, list directory safely, and write file safely
 import os
 import shutil
 
-from config import DOCS_DIR, STATIC_DIR
-from converter import extract_title, markdown_to_html_node
+from src.config import DOCS_DIR, STATIC_DIR
+from src.converter import extract_title, markdown_to_html_node
 
 
 def _read_file_safely(file_path, operation_name):

@@ -6,8 +6,8 @@ Main module for MD-HTML Project
 
 import sys
 
-from config import CONTENT_DIR, DOCS_DIR, TEMPLATE_FILE
-from generator import generate_pages_recursive
+from src.config import CONTENT_DIR, DOCS_DIR, TEMPLATE_FILE
+from src.generator import generate_pages_recursive
 
 
 def main():

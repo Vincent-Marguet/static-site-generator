@@ -6,8 +6,8 @@ implementation
 
 import re
 
-from basenode import BaseNodes
-from textnode import TextNode, TextType
+from src.basenode import BaseNodes
+from src.textnode import TextNode, TextType
 
 
 class MarkdownNodes(BaseNodes):

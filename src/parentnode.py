@@ -2,7 +2,7 @@
 This module implement ParentNode child class from HTMLNode parent class
 """
 
-from htmlnode import HTMLNode
+from src.htmlnode import HTMLNode
 
 
 class ParentNode(HTMLNode):

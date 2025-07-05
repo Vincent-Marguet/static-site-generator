@@ -4,7 +4,7 @@ Pure abstract class for Nodes
 
 from abc import ABC, abstractmethod
 
-from textnode import TextNode, TextType
+from src.textnode import TextNode, TextType
 
 
 class BaseNodes(ABC):

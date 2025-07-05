@@ -6,10 +6,10 @@ and some associated helper functions
 import re
 from enum import Enum
 
-from leafnode import LeafNode
-from markdownnode import MarkdownNodes
-from parentnode import ParentNode
-from textnode import TextNode, TextType
+from src.leafnode import LeafNode
+from src.markdownnode import MarkdownNodes
+from src.parentnode import ParentNode
+from src.textnode import TextNode, TextType
 
 
 class BlockType(Enum):

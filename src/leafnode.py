@@ -2,7 +2,7 @@
 This module implement LeafNode child class from HTMLNode parent class
 """
 
-from htmlnode import HTMLNode
+from src.htmlnode import HTMLNode
 
 
 class LeafNode(HTMLNode):
