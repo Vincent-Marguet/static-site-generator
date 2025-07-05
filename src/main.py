@@ -7,7 +7,7 @@ Main module for MD-HTML Project
 import sys
 
 from config import CONTENT_DIR, DOCS_DIR, TEMPLATE_FILE
-from generator import generate_pages_recursive, generator
+from generator import generate_pages_recursive
 
 
 def main():
@@ -15,7 +15,6 @@ def main():
     The main function
     """
     basepath = sys.argv[1] if len(sys.argv) > 1 else "/"
-    generator()
     generate_pages_recursive(CONTENT_DIR, TEMPLATE_FILE, DOCS_DIR, basepath)
 
 
