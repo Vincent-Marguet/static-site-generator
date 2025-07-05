@@ -13,28 +13,28 @@ A Python-based static site generator for building fast, secure, and easily updat
    ```bash
    git clone https://github.com/yourusername/static-site-generator.git
    cd static-site-generator
-```
+   ```
 
 2. Create and activate a virtual environment:
-
-python3 -m venv venv
-source venv/bin/activate
-
+```bash
+   python3 -m venv venv
+   source venv/bin/activate
+```
 3. Install dependencies:
-
-pip install -r requirements.txt
-
+```bash
+   pip install -r requirements.txt
+```
 Usage
 
     Local build:
    ```bash
     python3 src/main.py
-```
+   ```
 Production build for GitHub Pages:
-
+```bash
 ./build.sh
-
-    This will build the site to the docs/ directory with the correct base path for GitHub Pages.
+```
+This will build the site to the docs/ directory with the correct base path for GitHub Pages.
 
 Deploying to GitHub Pages
 
