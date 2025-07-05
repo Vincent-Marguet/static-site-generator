@@ -20,7 +20,7 @@ repos:
       - id: unittest
         name: unittest
         entry: bash
-        language: python
+        language: system
         types: [python]
         stages: [pre-commit]
         args: ["-c", "PYTHONPATH=. python -m unittest discover -s tests"]
