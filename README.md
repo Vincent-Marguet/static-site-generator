@@ -26,7 +26,7 @@ A Python-based static site generator for building fast, secure, and easily updat
 ```
 Usage
 
-    Local build:
+Local build:
    ```bash
     python3 src/main.py
    ```
